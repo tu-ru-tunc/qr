@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Коробка конфет — Статистика</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #fdf6ee 0%, #f5e8d8 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .game-wrap {
+            max-width: 760px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 3rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.13);
+            padding: 2rem 1.8rem 1.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .header .title {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: #3d2e1e;
+        }
+        .header .title span {
+            background: #f5c842;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #3d2e1e;
+            margin-left: 6px;
+        }
+        .header .score {
+            background: #f0ebe3;
+            padding: 4px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #3d2e1e;
+        }
+
+        /* ===== КОРОБКА С КОНФЕТАМИ ===== */
+        .box {
+            background: linear-gradient(160deg, #f7e8d8, #e8d5c0);
+            border-radius: 2.2rem;
+            padding: 1.8rem 1.5rem 1.5rem;
+            border: 4px solid #d4b8a0;
+            box-shadow: inset 0 -8px 20px rgba(100, 70, 40, 0.15), 0 8px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            margin-bottom: 1rem;
+            min-height: 360px;
+        }
+
+        .box::before {
+            content: '🍬';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            background: #f7e8d8;
+            padding: 0 16px;
+            border-radius: 30px;
+            color: #8a6a4a;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border: 2px solid #d4b8a0;
+            background: #fcf5ed;
+        }
+
+        .candies-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .candy {
+            background: radial-gradient(circle at 30% 30%, #f5c842, #e6a832);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            aspect-ratio: 1 / 1.1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 6px 20px rgba(230, 168, 50, 0.25), inset 0 -4px 10px rgba(0, 0, 0, 0.05), inset 0 4px 15px rgba(255, 255, 255, 0.3);
+            position: relative;
+            touch-action: manipulation;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-height: 80px;
+            padding: 8px;
+        }
+
+        .candy::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 20%;
+            right: 20%;
+            height: 20%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .candy .candy-icon {
+            font-size: 2.4rem;
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+        }
+        .candy .candy-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 2px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .candy:hover {
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: 0 10px 30px rgba(230, 168, 50, 0.35);
+        }
+
+        .candy:active {
+            transform: scale(0.92);
+        }
+
+        /* Разные цвета конфет */
+        .candy.c1 { background: radial-gradient(circle at 30% 30%, #f5c842, #e6a832); }
+        .candy.c2 { background: radial-gradient(circle at 30% 30%, #ff6b6b, #e04848); }
+        .candy.c3 { background: radial-gradient(circle at 30% 30%, #4ecdc4, #2ea89e); }
+        .candy.c4 { background: radial-gradient(circle at 30% 30%, #a29bfe, #7c6fd4); }
+        .candy.c5 { background: radial-gradient(circle at 30% 30%, #fd79a8, #e05580); }
+        .candy.c6 { background: radial-gradient(circle at 30% 30%, #fdcb6e, #e8a832); }
+        .candy.c7 { background: radial-gradient(circle at 30% 30%, #6c5ce7, #4a3db5); }
+        .candy.c8 { background: radial-gradient(circle at 30% 30%, #00b894, #00856a); }
+        .candy.c9 { background: radial-gradient(circle at 30% 30%, #e17055, #c0392b); }
+
+        .candy.completed {
+            opacity: 0.5;
+            transform: scale(0.92);
+            filter: grayscale(0.5);
+            cursor: default;
+            pointer-events: none;
+        }
+        .candy.completed::after {
+            content: '✅';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.2rem;
+            opacity: 0.8;
+            background: none;
+        }
+
+        .candy .candy-number {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #3d2e1e;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 0.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ===== ПАНЕЛЬ ЗАДАНИЯ ===== */
+        .task-panel {
+            background: #fcf9f5;
+            border-radius: 1.8rem;
+            padding: 1.4rem 1.4rem 1.2rem;
+            border: 2px solid #e8ddd0;
+            min-height: 200px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 0.4rem;
+            animation: slideUp 0.4s ease;
+        }
+        .task-panel.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-panel .task-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #3d2e1e;
+        }
+        .task-panel .task-title .candy-emoji {
+            font-size: 1.4rem;
+            margin-right: 8px;
+        }
+        .task-panel .task-text {
+            font-size: 0.95rem;
+            color: #3d2e1e;
+            line-height: 1.6;
+        }
+        .task-panel .task-text .highlight {
+            background: #f5c842;
+            padding: 0 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .task-panel .task-text .data-row {
+            display: inline-block;
+            background: #eaf0f6;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 4px 0;
+            font-family: monospace;
+        }
+
+        .task-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 2px;
+        }
+        .task-options .opt {
+            background: #ffffff;
+            border: 2px solid #dde3ed;
+            border-radius: 40px;
+            padding: 6px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #3d2e1e;
+            cursor: pointer;
+            transition: 0.12s;
+            touch-action: manipulation;
+        }
+        .task-options .opt:hover {
+            border-color: #2c7a7a;
+        }
+        .task-options .opt.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .task-options .opt.wrong {
+            border-color: #ef5350;
+            background: #ffebee;
+            color: #c62828;
+        }
+        .task-options .opt.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .task-feedback {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 40px;
+            min-height: 32px;
+        }
+        .task-feedback.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .task-feedback.fail {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .task-feedback.info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .task-close-btn {
+            align-self: flex-end;
+            background: #e8ddd0;
+            color: #3d2e1e;
+            border: none;
+            padding: 6px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.12s;
+            touch-action: manipulation;
+            margin-top: 4px;
+        }
+        .task-close-btn:hover {
+            background: #d5c8b8;
+            transform: scale(0.96);
+        }
+
+        /* ===== ФИНАЛ ===== */
+        .finish-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 10px 20px;
+        }
+        .finish-screen.active {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+        .finish-screen .big-emoji {
+            font-size: 4.5rem;
+        }
+        .finish-screen .msg {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #3d2e1e;
+            margin-top: 6px;
+        }
+        .finish-screen .sub {
+            color: #5a4a3a;
+            font-size: 1rem;
+            margin-top: 4px;
+        }
+        .finish-screen .chart-btn {
+            margin-top: 16px;
+            background: #2c7a7a;
+            color: #fff;
+            border: none;
+            padding: 12px 36px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .finish-screen .chart-btn:hover {
+            background: #1a5a5a;
+            transform: scale(0.96);
+        }
+        .finish-screen .reload-btn {
+            margin-top: 10px;
+            background: #f5c842;
+            border: none;
+            padding: 8px 32px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #3d2e1e;
+        }
+        .finish-screen .reload-btn:hover {
+            background: #e6b832;
+            transform: scale(0.96);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #8a7a6a;
+            margin-top: 0.8rem;
+        }
+
+        /* ===== ОВЕРЛЕЙ ДЛЯ ДИАГРАММЫ ===== */
+        .chart-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .chart-overlay.active {
+            display: flex;
+        }
+        .chart-overlay .chart-box {
+            background: #fff;
+            border-radius: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 95vh;
+            overflow: auto;
+            padding: 1rem;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+        .chart-overlay .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #1e2f3e;
+            background: #f0f0f0;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-weight: 700;
+            transition: 0.15s;
+            z-index: 10;
+        }
+        .chart-overlay .close-btn:hover {
+            background: #e0e0e0;
+            transform: scale(0.9);
+        }
+        .chart-overlay iframe {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 1rem;
+        }
+
+        @media (max-width: 500px) {
+            .game-wrap { padding: 1.2rem; }
+            .box { padding: 1.2rem 0.8rem; }
+            .candies-grid { gap: 10px; }
+            .candy { min-height: 60px; font-size: 1.2rem; }
+            .candy .candy-icon { font-size: 1.8rem; }
+            .candy .candy-label { font-size: 0.5rem; }
+            .header .title { font-size: 1.2rem; }
+            .task-panel { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-wrap">
+
+    <!-- Шапка -->
+    <div class="header">
+        <div class="title">🍬 Коробка конфет <span>7 класс</span></div>
+        <div class="score">⭐ <span id="scoreDisplay">0</span>/9</div>
+    </div>
+
+    <!-- ===== КОРОБКА С КОНФЕТАМИ ===== -->
+    <div class="box" id="box">
+        <div class="candies-grid" id="candiesGrid">
+            <!-- Конфеты генерируются через JS -->
+        </div>
+    </div>
+
+    <!-- ===== ПАНЕЛЬ ЗАДАНИЯ ===== -->
+    <div class="task-panel" id="taskPanel">
+        <div class="task-title" id="taskTitle">🍬 Конфета-сюрприз</div>
+        <div class="task-text" id="taskText">Текст задания</div>
+        <div id="taskContent"></div>
+        <div class="task-feedback" id="taskFeedback"></div>
+        <button class="task-close-btn" id="taskCloseBtn">✕ Закрыть</button>
+    </div>
+
+    <!-- ===== ФИНАЛ ===== -->
+    <div class="finish-screen" id="finishScreen">
+        <div class="big-emoji">🎉</div>
+        <div class="msg">Все конфеты съедены!</div>
+        <div class="sub">
+            Ты решил все задания по статистике.<br>
+            🌟 Счёт: <span id="finalScore">0</span>/9
+        </div>
+        <button class="chart-btn" id="openChartBtn">📊 Открыть интерактивную диаграмму</button>
+        <div>
+            <button class="reload-btn" onclick="location.reload()">🔄 Сыграть ещё</button>
+        </div>
+    </div>
+
+    <div class="footer-note">Кликни на любую конфету — она развернётся с заданием</div>
+</div>
+
+<!-- ===== ОВЕРЛЕЙ ДЛЯ ДИАГРАММЫ ===== -->
+<div class="chart-overlay" id="chartOverlay">
+    <div class="chart-box">
+        <button class="close-btn" id="closeChartBtn">✕</button>
+        <iframe id="chartIframe" srcdoc=""></iframe>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ===== КОНФЕТЫ И ЗАДАНИЯ =====
+        var candiesData = [{
+            id: 0,
+            emoji: '🍬',
+            label: 'Среднее',
+            title: '📊 Среднее арифметическое',
+            text: 'Колобок записал оценки за неделю: <span class="data-row">4, 5, 3, 5, 4</span><br>Найди <span class="highlight">среднее арифметическое</span> этих оценок.',
+            options: ['4.0', '4.2', '4.4', '4.6'],
+            correct: 1,
+            explanation: 'Верно! (4+5+3+5+4) ÷ 5 = 21 ÷ 5 = 4.2'
+        }, {
+            id: 1,
+            emoji: '🍭',
+            label: 'Медиана',
+            title: '📈 Медиана',
+            text: 'Колобок собрал данные о росте зверей (см): <span class="data-row">120, 130, 110, 140, 125</span><br>Найди <span class="highlight">медиану</span> этого ряда (отсортируй сначала!).',
+            options: ['120', '125', '130', '140'],
+            correct: 1,
+            explanation: 'Верно! Сортируем: 110, 120, 125, 130, 140. Медиана = 125 (середина).'
+        }, {
+            id: 2,
+            emoji: '🍫',
+            label: 'Размах',
+            title: '📏 Размах',
+            text: 'Колобок измерял скорость зверей (км/ч): <span class="data-row">5, 12, 8, 15, 6</span><br>Найди <span class="highlight">размах</span> этого ряда.',
+            options: ['5', '8', '10', '15'],
+            correct: 2,
+            explanation: 'Верно! Размах = максимум − минимум = 15 − 5 = 10'
+        }, {
+            id: 3,
+            emoji: '🍩',
+            label: 'Диаграмма',
+            title: '📊 Чтение диаграммы',
+            text: 'На диаграмме показано, сколько жетонов собрали звери:<br>Заяц — 5, Волк — 8, Медведь — 6, Лиса — 7<br>Сколько всего жетонов собрали все звери?',
+            options: ['24', '26', '28', '30'],
+            correct: 1,
+            explanation: 'Верно! 5 + 8 + 6 + 7 = 26 жетонов.'
+        }, {
+            id: 4,
+            emoji: '🧁',
+            label: 'Мода',
+            title: '👑 Мода',
+            text: 'Колобок записал любимые числа зверей: <span class="data-row">7, 3, 7, 5, 7, 2, 3</span><br>Найди <span class="highlight">моду</span> этого ряда (самое частое число).',
+            options: ['2', '3', '5', '7'],
+            correct: 3,
+            explanation: 'Верно! Число 7 встречается 3 раза, остальные — реже. Мода = 7.'
+        }, {
+            id: 5,
+            emoji: '🍪',
+            label: 'Смешанное',
+            title: '🧩 Смешанное задание',
+            text: 'Даны оценки Колобка: <span class="data-row">3, 4, 5, 4, 3, 5, 4</span><br>Найди <span class="highlight">среднее</span> этих оценок.',
+            options: ['3.8', '4.0', '4.2', '4.4'],
+            correct: 1,
+            explanation: 'Верно! (3+4+5+4+3+5+4) ÷ 7 = 28 ÷ 7 = 4.0'
+        }, {
+            id: 6,
+            emoji: '🍬',
+            label: 'Ещё среднее',
+            title: '📊 Ещё среднее',
+            text: 'Найди среднее чисел: <span class="data-row">10, 20, 30, 40, 50</span>',
+            options: ['25', '30', '35', '40'],
+            correct: 1,
+            explanation: 'Верно! (10+20+30+40+50) ÷ 5 = 150 ÷ 5 = 30'
+        }, {
+            id: 7,
+            emoji: '🍭',
+            label: 'Ещё медиана',
+            title: '📈 Ещё медиана',
+            text: 'Найди медиану ряда: <span class="data-row">3, 7, 2, 9, 5, 8, 4</span> (отсортируй!)',
+            options: ['4', '5', '6', '7'],
+            correct: 1,
+            explanation: 'Верно! Сортируем: 2, 3, 4, 5, 7, 8, 9. Медиана = 5.'
+        }, {
+            id: 8,
+            emoji: '🍫',
+            label: 'Ещё размах',
+            title: '📏 Ещё размах',
+            text: 'Найди размах ряда: <span class="data-row">2, 8, 15, 3, 20, 7</span>',
+            options: ['15', '16', '17', '18'],
+            correct: 3,
+            explanation: 'Верно! Размах = 20 − 2 = 18'
+        }];
+
+        // ===== СОСТОЯНИЕ =====
+        var completed = new Array(9).fill(false);
+        var score = 0;
+        var currentCandyId = null;
+        var isLocked = false;
+
+        // ===== DOM =====
+        var grid = document.getElementById('candiesGrid');
+        var taskPanel = document.getElementById('taskPanel');
+        var taskTitle = document.getElementById('taskTitle');
+        var taskText = document.getElementById('taskText');
+        var taskContent = document.getElementById('taskContent');
+        var taskFeedback = document.getElementById('taskFeedback');
+        var taskCloseBtn = document.getElementById('taskCloseBtn');
+        var scoreDisplay = document.getElementById('scoreDisplay');
+        var finishScreen = document.getElementById('finishScreen');
+        var finalScore = document.getElementById('finalScore');
+
+        // ===== ОТРИСОВКА КОНФЕТ =====
+        function renderCandies() {
+            grid.innerHTML = '';
+            candiesData.forEach(function(candy, index) {
+                var div = document.createElement('div');
+                div.className = 'candy c' + ((index % 9) + 1);
+                if (completed[index]) {
+                    div.classList.add('completed');
+                }
+                div.dataset.index = index;
+
+                var icon = document.createElement('span');
+                icon.className = 'candy-icon';
+                icon.textContent = candy.emoji;
+
+                var label = document.createElement('span');
+                label.className = 'candy-label';
+                label.textContent = candy.label;
+
+                var number = document.createElement('span');
+                number.className = 'candy-number';
+                number.textContent = index + 1;
+
+                div.appendChild(icon);
+                div.appendChild(label);
+                div.appendChild(number);
+
+                div.addEventListener('click', function() {
+                    if (completed[index]) return;
+                    openCandy(index);
+                });
+
+                grid.appendChild(div);
+            });
+        }
+
+        // ===== ОТКРЫТЬ КОНФЕТУ =====
+        function openCandy(index) {
+            if (completed[index]) return;
+            if (isLocked) return;
+
+            currentCandyId = index;
+            var candy = candiesData[index];
+
+            taskPanel.classList.add('active');
+            finishScreen.classList.remove('active');
+
+            taskTitle.innerHTML = '🍬 ' + candy.title;
+            taskText.innerHTML = candy.text;
+            taskContent.innerHTML = '';
+            taskFeedback.className = 'task-feedback';
+            taskFeedback.textContent = 'Выбери ответ';
+            isLocked = false;
+
+            // Варианты ответов
+            var optDiv = document.createElement('div');
+            optDiv.className = 'task-options';
+            candy.options.forEach(function(opt, idx) {
+                var el = document.createElement('div');
+                el.className = 'opt';
+                el.textContent = opt;
+                el.dataset.idx = idx;
+                el.addEventListener('click', function() {
+                    if (isLocked || this.classList.contains('disabled')) return;
+                    handleAnswer(index, idx);
+                });
+                optDiv.appendChild(el);
+            });
+            taskContent.appendChild(optDiv);
+
+            // Прокрутка к панели
+            taskPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ===== ОБРАБОТКА ОТВЕТА =====
+        function handleAnswer(candyIndex, selectedIdx) {
+            if (isLocked) return;
+            var candy = candiesData[candyIndex];
+            var opts = taskContent.querySelectorAll('.opt');
+            var isCorrect = (selectedIdx === candy.correct);
+
+            opts.forEach(function(o) { o.classList.add('disabled'); });
+
+            if (isCorrect) {
+                opts[selectedIdx].classList.add('correct');
+                taskFeedback.className = 'task-feedback success';
+                taskFeedback.textContent = '✅ ' + candy.explanation;
+                if (!completed[candyIndex]) {
+                    completed[candyIndex] = true;
+                    score++;
+                    scoreDisplay.textContent = score;
+                    renderCandies();
+                }
+            } else {
+                opts[selectedIdx].classList.add('wrong');
+                opts[candy.correct].classList.add('correct');
+                taskFeedback.className = 'task-feedback fail';
+                taskFeedback.textContent = '❌ Неверно. ' + candy.explanation;
+            }
+
+            isLocked = true;
+
+            // Проверка завершения
+            var allDone = completed.every(function(v) { return v; });
+            if (allDone) {
+                setTimeout(finishGame, 800);
+            }
+        }
+
+        // ===== ЗАКРЫТЬ ЗАДАНИЕ =====
+        function closeTask() {
+            taskPanel.classList.remove('active');
+        }
+
+        // ===== ФИНАЛ =====
+        function finishGame() {
+            taskPanel.classList.remove('active');
+            finishScreen.classList.add('active');
+            finalScore.textContent = score;
+        }
+
+        // ===== ОТКРЫТЬ ДИАГРАММУ =====
+        function openChart() {
+            var overlay = document.getElementById('chartOverlay');
+            var iframe = document.getElementById('chartIframe');
+
+            var chartHTML = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Интерактивная диаграмма</title>
+<style>
+*{box-sizing:border-box;user-select:none;}
+body{background:linear-gradient(145deg,#eef2f7,#dce5ec);font-family:Segoe UI,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:16px;}
+.chart-card{background:#fff;border-radius:2rem;box-shadow:0 20px 35px rgba(0,0,0,0.2);padding:1.5rem 1rem;max-width:1200px;width:100%;}
+.title-section{text-align:center;margin-bottom:1rem;}
+.title-section h2{font-weight:600;font-size:1.4rem;color:#1e2f3e;}
+.legend{display:flex;justify-content:center;gap:1.5rem;margin:0.5rem 0;background:#f8fafc;padding:0.4rem 1.2rem;border-radius:60px;width:fit-content;margin:0.5rem auto;flex-wrap:wrap;}
+.legend-item{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.8rem;font-weight:500;color:#2c3e44;}
+.color-box{width:24px;height:16px;border-radius:20px;}
+.color-box.ns{background:#3b82f6;}
+.color-box.we{background:#f97316;}
+.canvas-wrapper{overflow-x:auto;border-radius:1rem;margin:0.3rem 0;}
+canvas{display:block;margin:0 auto;background:#fff;border-radius:1rem;cursor:grab;width:100%;height:auto;max-width:1000px;aspect-ratio:1000/580;}
+canvas:active{cursor:grabbing;}
+.reset-buttons-panel{display:flex;justify-content:center;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;padding:0.5rem;background:#f8fafc;border-radius:1rem;}
+.reset-group{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:70px;background:#fff;padding:4px 6px;border-radius:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.continent-label-small{font-size:0.6rem;font-weight:600;color:#1e3b4a;background:#e2e8f0;padding:2px 6px;border-radius:20px;}
+.reset-buttons-row{display:flex;gap:4px;}
+.reset-btn{background:#e2e8f0;border:none;padding:2px 8px;border-radius:40px;font-weight:600;cursor:pointer;font-size:0.6rem;color:#1e3b4a;}
+.reset-btn.ns-reset{background:#dbeafe;color:#1e40af;border-left:2px solid #3b82f6;}
+.reset-btn.we-reset{background:#ffedd5;color:#9a3412;border-left:2px solid #f97316;}
+.reset-btn:hover{transform:scale(0.95);}
+.info-panel{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:0.8rem;background:#f1f5f9;padding:0.4rem 0.8rem;border-radius:1.2rem;}
+.values-status{font-size:0.7rem;font-weight:500;color:#1e4a6e;background:#e6edf4;padding:4px 10px;border-radius:32px;flex:1;text-align:center;}
+.global-reset{background:#e2e8f0;border:none;padding:4px 14px;border-radius:40px;font-weight:600;cursor:pointer;font-size:0.7rem;color:#1e3b4a;}
+.global-reset:hover{background:#cbdde6;transform:scale(0.96);}
+.note{font-size:0.6rem;color:#5a6e7c;text-align:center;margin-top:0.4rem;}
+</style>
+</head>
+<body>
+<div class="chart-card">
+<div class="title-section"><h2>📐 Интерактивная диаграмма</h2></div>
+<div class="legend"><div class="legend-item"><div class="color-box ns"></div><span>Север → Юг (км)</span></div><div class="legend-item"><div class="color-box we"></div><span>Запад → Восток (км)</span></div></div>
+<div class="canvas-wrapper"><canvas id="c" width="1000" height="580"></canvas></div>
+<div id="resetButtonsContainer" class="reset-buttons-panel"></div>
+<div class="info-panel"><div class="values-status" id="liveValuesPanel">Тяните маркер</div><button id="globalResetBtn" class="global-reset">Сбросить</button></div>
+<div class="note">Потяните цветной маркер — столбец изменяет высоту</div>
+</div>
+<script>
+(function(){
+var canvas=document.getElementById("c");var ctx=canvas.getContext("2d");var W=1000,H=580;canvas.width=W;canvas.height=H;var M={top:42,right:35,bottom:70,left:68};var GW=W-M.left-M.right;var GH=H-M.top-M.bottom;var maxY=14000;var yTicks=[0,2000,4000,6000,8000,10000,12000,14000];var yScale=GH/maxY;var zeroY=M.top+GH;
+function getY(km){if(km<0)km=0;if(km>maxY)km=maxY;return zeroY-(km*yScale);}
+var continents=["Африка","Северная Америка","Южная Америка","Австралия","Евразия"];var ns=[0,0,0,0,0];var we=[0,0,0,0,0];var n=continents.length;var gW=GW/n;var bW=gW*0.34;var gap=gW*0.08;var bars=[];var markers=[];var dragging=false;var dragged=null;var startY=0;var startVal=0;
+function drawGrid(){ctx.save();for(var i=0;i<yTicks.length;i++){var y=getY(yTicks[i]);if(y<M.top-5||y>H-M.bottom+8)continue;ctx.beginPath();ctx.moveTo(M.left,y);ctx.lineTo(M.left+GW,y);ctx.strokeStyle="#e2e8f0";ctx.stroke();ctx.fillStyle="#2c3e50";ctx.font="10px Segoe UI";ctx.fillText(yTicks[i]+" км",M.left-46,y+3);}
+ctx.beginPath();ctx.moveTo(M.left,M.top);ctx.lineTo(M.left,zeroY);ctx.lineTo(M.left+GW,zeroY);ctx.strokeStyle="#334155";ctx.lineWidth=1.8;ctx.stroke();ctx.font="bold 10px Segoe UI";ctx.fillStyle="#1f3a48";ctx.save();ctx.translate(22,M.top+GH/2);ctx.rotate(-Math.PI/2);ctx.fillText("КИЛОМЕТРЫ",-35,5);ctx.restore();ctx.fillText("МАТЕРИКИ",M.left+GW/2-38,H-14);ctx.font="500 10px Segoe UI";ctx.fillStyle="#475569";ctx.textAlign="center";for(var i=0;i<n;i++){var cx=M.left+(i+0.5)*gW;ctx.fillText(continents[i],cx,zeroY+22);}
+ctx.textAlign="left";ctx.beginPath();ctx.moveTo(M.left,zeroY);ctx.lineTo(M.left+GW,zeroY);ctx.strokeStyle="#1e3a5f";ctx.lineWidth=2;ctx.stroke();ctx.restore();}
+function updateBars(){bars=[];markers=[];for(var i=0;i<n;i++){var gx=M.left+i*gW;var gc=gx+gW/2;var left1=gc-(bW+gap/2);var left2=left1+bW+gap;var yNs=getY(ns[i]);var hNs=ns[i]===0?0:zeroY-yNs;var yWe=getY(we[i]);var hWe=we[i]===0?0:zeroY-yWe;bars.push({x:left1,y:yNs,w:bW,h:hNs,idx:i,type:"ns",val:ns[i]});bars.push({x:left2,y:yWe,w:bW,h:hWe,idx:i,type:"we",val:we[i]});var mH=14;var mW=bW*0.7;var mOff=(bW-mW)/2;markers.push({x:left1+mOff,y:zeroY-mH,w:mW,h:mH,idx:i,type:"ns",bar:bars[bars.length-2]});markers.push({x:left2+mOff,y:zeroY-mH,w:mW,h:mH,idx:i,type:"we",bar:bars[bars.length-1]});}}
+function drawBars(){for(var b of bars){if(b.val===0)continue;ctx.fillStyle=b.type==="ns"?"#3b82f6":"#f97316";ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeStyle=b.type==="ns"?"#2c6280":"#b45f2b";ctx.lineWidth=0.8;ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.fillStyle="#1e2a36";ctx.font="10px Segoe UI";ctx.fillText(b.val,b.x+b.w/2-12,b.y-4);}
+for(var m of markers){ctx.fillStyle=m.type==="ns"?"#2563eb":"#ea580c";ctx.fillRect(m.x,m.y,m.w,m.h);ctx.fillStyle="#fff";ctx.beginPath();var cx=m.x+m.w/2;ctx.moveTo(cx-4,m.y+m.h-4);ctx.lineTo(cx,m.y+2);ctx.lineTo(cx+4,m.y+m.h-4);ctx.fill();ctx.fillStyle=m.type==="ns"?"#60a5fa":"#fb923c";ctx.fillRect(m.x+2,m.y+2,m.w-4,2);ctx.fillStyle="#fffcc";ctx.beginPath();ctx.moveTo(cx-2,m.y+m.h-2);ctx.lineTo(cx,m.y+m.h+2);ctx.lineTo(cx+2,m.y+m.h-2);ctx.fill();}}
+function setVal(b,v){if(v<0)v=0;if(v>maxY)v=maxY;if(v===b.val)return false;if(b.type==="ns")ns[b.idx]=v;else we[b.idx]=v;b.val=v;var ny=getY(v);b.y=ny;b.h=v===0?0:zeroY-ny;return true;}
+function resetSingle(idx,type){for(var b of bars){if(b.idx===idx&&b.type===type&&b.val!==0){setVal(b,0);render();updateReset();return;}}}
+function render(){ctx.clearRect(0,0,W,H);drawGrid();updateBars();drawBars();updateInfo();updateReset();}
+function updateInfo(){var p=document.getElementById("liveValuesPanel");if(!p)return;var s=[];for(var i=0;i<n;i++){if(ns[i]>0||we[i]>0)s.push(continents[i]+": ↑"+ns[i]+"км | →"+we[i]+"км");}p.innerHTML=s.length?"📊 "+s.join(" · "):"📊 Тяните маркер для корректировки";}
+function updateReset(){var c=document.getElementById("resetButtonsContainer");if(!c)return;c.innerHTML="";for(var i=0;i<n;i++){var g=document.createElement("div");g.className="reset-group";var l=document.createElement("div");l.className="continent-label-small";l.innerText=continents[i];g.appendChild(l);var r=document.createElement("div");r.className="reset-buttons-row";var b1=document.createElement("button");b1.className="reset-btn ns-reset";b1.textContent=ns[i]>0?"🔵 "+ns[i]+"км":"🔵 0";b1.addEventListener("click",function(idx){return function(){resetSingle(idx,"ns");};}(i));var b2=document.createElement("button");b2.className="reset-btn we-reset";b2.textContent=we[i]>0?"🟠 "+we[i]+"км":"🟠 0";b2.addEventListener("click",function(idx){return function(){resetSingle(idx,"we");};}(i));r.appendChild(b1);r.appendChild(b2);g.appendChild(r);c.appendChild(g);}}
+function resetAll(){for(var i=0;i<5;i++){ns[i]=0;we[i]=0;}render();}
+function getMouse(e){var r=canvas.getBoundingClientRect();return{mx:(e.clientX-r.left)*(canvas.width/r.width),my:(e.clientY-r.top)*(canvas.height/r.height)};}
+canvas.addEventListener("mousedown",function(e){e.preventDefault();var p=getMouse(e);for(var m of markers){if(p.mx>=m.x&&p.mx<=m.x+m.w&&p.my>=m.y&&p.my<=m.y+m.h){dragging=true;dragged=m.bar;startY=p.my;startVal=dragged.val;canvas.style.cursor="grabbing";return;}}
+for(var b of bars){if(p.mx>=b.x&&p.mx<=b.x+b.w&&p.my>=b.y&&p.my<=b.y+b.h){dragging=true;dragged=b;startY=p.my;startVal=b.val;canvas.style.cursor="grabbing";return;}}});
+window.addEventListener("mousemove",function(e){if(!dragging||!dragged)return;e.preventDefault();var p=getMouse(e);var dy=startY-p.my;var v=startVal+dy/yScale;v=Math.round(v/5)*5;if(v<0)v=0;if(v>maxY)v=maxY;if(v!==dragged.val){setVal(dragged,v);render();startY=p.my;startVal=dragged.val;}});
+window.addEventListener("mouseup",function(){if(dragging){dragging=false;dragged=null;canvas.style.cursor="grab";render();}});
+canvas.addEventListener("dragstart",function(e){e.preventDefault();});canvas.style.cursor="grab";document.getElementById("globalResetBtn").addEventListener("click",resetAll);render();
+})();
+<\/script>
+</body>
+</html>`;
+
+            iframe.srcdoc = chartHTML;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // ===== ЗАКРЫТЬ ДИАГРАММУ =====
+        document.getElementById('closeChartBtn').addEventListener('click', function() {
+            document.getElementById('chartOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // ===== СОБЫТИЯ =====
+        taskCloseBtn.addEventListener('click', closeTask);
+        document.getElementById('openChartBtn').addEventListener('click', openChart);
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        renderCandies();
+        scoreDisplay.textContent = '0';
+    })();
+</script>
+</body>
+</html>
