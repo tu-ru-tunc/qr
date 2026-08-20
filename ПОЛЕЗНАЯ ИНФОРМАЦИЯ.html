@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шпаргалка учителя по нейросетям</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue: #3b82f6;
+            --green: #22c55e;
+            --orange: #f97316;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --teal: #14b8a6;
+            --red: #ef4444;
+            --dark: #1e2f3e;
+            --gray: #64748b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef2f7 0%, #dce5ec 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 12px;
+            color: var(--dark);
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* ===== ШАПКА ===== */
+        .hero {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            color: #fff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hero .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero .stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hero .stat {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .hero .stat-num {
+            font-size: 1.3rem;
+            font-weight: 900;
+            display: block;
+        }
+
+        /* ===== КОНТЕНТ ===== */
+        .content {
+            padding: 1.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .section-num {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        /* ===== БЫСТРЫЙ СТАРТ ===== */
+        .quick-start {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .step-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .step-num {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            width: 28px;
+            height: 28px;
+            background: var(--blue);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        .step-card:nth-child(2) .step-num { background: var(--green); }
+        .step-card:nth-child(3) .step-num { background: var(--orange); }
+
+        .step-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin: 0.5rem 0 0.3rem;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* ===== ШАБЛОН ПРОМПТА ===== */
+        .prompt-template {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 3px solid #3b82f6;
+            border-radius: 1rem;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-template-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--blue);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prompt-code {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.6rem;
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #1e2f3e;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .prompt-placeholder {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .prompt-examples {
+            margin-top: 1rem;
+        }
+
+        .prompt-example-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.6rem;
+        }
+
+        .prompt-example-item {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.6rem;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .prompt-example-item strong {
+            color: var(--blue);
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+        /* ===== СРАВНЕНИЕ ===== */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .compare-card {
+            padding: 1rem;
+            border-radius: 0.8rem;
+            border: 2px solid;
+        }
+
+        .compare-bad {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .compare-good {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .compare-label {
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .compare-bad .compare-label { color: #dc2626; }
+        .compare-good .compare-label { color: #16a34a; }
+
+        .compare-text {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* ===== НЕЙРОСЕТИ ===== */
+        .ai-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .ai-card {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.8rem;
+            padding: 0.9rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .ai-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .ai-info {
+            flex: 1;
+        }
+
+        .ai-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .ai-desc {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 0.4rem;
+        }
+
+        .ai-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .ai-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .ai-tag.free { background: #dcfce7; color: #166534; }
+        .ai-tag.ru { background: #fee2e2; color: #991b1b; }
+        .ai-tag.hot { background: #fef3c7; color: #92400e; }
+
+        /* ===== МАТЕРИАЛЫ ===== */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .material-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.8rem;
+            padding: 0.8rem;
+            text-align: center;
+        }
+
+        .material-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .material-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* ===== ЧЕК-ЛИСТ ===== */
+        .checklist {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0f2fe;
+        }
+
+        .checklist-item:last-child { border-bottom: none; }
+
+        .check {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            background: var(--green);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .check-text {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* ===== ОШИБКИ ===== */
+        .mistakes-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .mistake-card {
+            background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+            border: 2px solid #fecaca;
+            border-radius: 0.8rem;
+            padding: 1rem;
+        }
+
+        .mistake-title {
+            font-weight: 800;
+            color: #dc2626;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .mistake-desc {
+            font-size: 0.82rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .mistake-fix {
+            padding: 0.5rem 0.7rem;
+            background: #f0fdf4;
+            border-radius: 0.4rem;
+            font-size: 0.78rem;
+            color: #166534;
+            border-left: 2px solid var(--green);
+        }
+
+        /* ===== ФУТЕР ===== */
+        .footer {
+            background: linear-gradient(135deg, #1e2f3e 0%, #0f172a 100%);
+            color: #fff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .footer-quote {
+            font-size: 1rem;
+            font-style: italic;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .footer-quote::before { content: '« '; color: var(--blue); }
+        .footer-quote::after { content: ' »'; color: var(--blue); }
+
+        /* ===== АДАПТИВ ===== */
+        @media (min-width: 640px) {
+            .quick-start { grid-template-columns: repeat(3, 1fr); }
+            .compare { grid-template-columns: 1fr 1fr; }
+            .ai-grid { grid-template-columns: repeat(2, 1fr); }
+            .materials-grid { grid-template-columns: repeat(3, 1fr); }
+            .mistakes-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 900px) {
+            .materials-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="hero">
+        <div class="badge">🎓 Раздаточный материал мастер-класса</div>
+        <h1>Шпаргалка учителя<br>по нейросетям</h1>
+        <div class="subtitle">Как за 10 минут создать интерактивный учебный материал с помощью ИИ</div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-num">11</span>
+                <span>нейросетей</span>
+            </div>
+            <div class="stat">
+                <span class="stat-num">6</span>
+                <span>примеров</span>
+            </div>
+            <div class="stat">
+                <span class="stat-num">10 мин</span>
+                <span>до материала</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- БЫСТРЫЙ СТАРТ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">1</div>
+                <div class="section-title">3 шага до своего материала</div>
+            </div>
+
+            <div class="quick-start">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <div class="step-title">🎯 Сформулируйте задачу</div>
+                    <div class="step-desc">Определите класс, тему и тип материала</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <div class="step-title">💬 Напишите промпт</div>
+                    <div class="step-desc">Используйте готовый шаблон из этой шпаргалки</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <div class="step-title">🔧 Доработайте</div>
+                    <div class="step-desc">Проверьте, попросите ИИ изменить что-то, сохраните HTML</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ШАБЛОН ПРОМПТА -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">2</div>
+                <div class="section-title">Универсальный шаблон промпта</div>
+            </div>
+
+            <div class="prompt-template">
+                <div class="prompt-template-title">
+                    <span>📋</span>
+                    <span>Скопируйте и заполните своими данными:</span>
+                </div>
+                <div class="prompt-code">Ты — разработчик учебных материалов. Создай HTML-файл с <span class="prompt-placeholder">[ТИП ДИАГРАММЫ]</span> на тему <span class="prompt-placeholder">[ТЕМА]</span>. Данные: <span class="prompt-placeholder">[ДАННЫЕ]</span>. Добавь <span class="prompt-placeholder">[ФУНКЦИИ]</span>. Сделай адаптив для телефона. Весь код в одном файле.</div>
+            </div>
+
+            <div class="prompt-examples">
+                <div class="prompt-example-title">💡 Примеры заполнения:</div>
+
+                <div class="prompt-example-item">
+                    <strong>📐 Математика, 6 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>интерактивными диаграммами (столбчатая, круговая, линейная)</b> на тему <b>«Статистика и диаграммы»</b>. Данные: <b>ученик может вводить свои значения для 5 категорий</b>. Добавь <b>перетаскивание значений мышкой, экспорт в PNG, проверку ответов</b>. Сделай адаптив для телефона. Весь код в одном файле.
+                </div>
+
+                <div class="prompt-example-item">
+                    <strong>🔬 Физика, 8 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>виртуальной лабораторией</b> на тему <b>«Закон Ома»</b>. Данные: <b>ползунки для напряжения (0-12В) и сопротивления (1-100 Ом)</b>. Добавь <b>амперметр в реальном времени, график I(U), пояснения к закону</b>. Сделай адаптив для телефона. Весь код в одном файле.
+                </div>
+
+                <div class="prompt-example-item">
+                    <strong>📜 История, 7 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>интерактивным таймлайном</b> на тему <b>«Великие географические открытия»</b>. Данные: <b>10 ключевых событий 1492-1600 гг. с датами и описаниями</b>. Добавь <b>клик по событию открывает карточку с портретом и вопросом для проверки</b>. Сделай адаптив для телефона. Весь код в одном файле.
+                </div>
+
+                <div class="prompt-example-item">
+                    <strong>📖 Литература, 6 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>тренажёром анализа текста</b> на тему <b>«Средства выразительности»</b>. Данные: <b>стихотворение Ф. Тютчева «Весенняя гроза»</b>. Добавь <b>возможность выделять мышью метафоры, эпитеты, сравнения с пояснениями, проверку и подсчёт найденных средств</b>. Сделай адаптив для телефона. Весь код в одном файле.
+                </div>
+
+                <div class="prompt-example-item">
+                    <strong>🗣 Иностранный язык, 6 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>диалоговым симулятором</b> на тему <b>«В кафе» на английском языке</b>. Данные: <b>6-7 реплик диалога с вариантами ответов</b>. Добавь <b>выбор реплик из предложенных, показ правильного ответа с объяснением ошибки, озвучку через Web Speech API</b>. Сделай адаптив для телефона. Весь код в одном файле.
+                </div>
+
+                <div class="prompt-example-item">
+                    <strong>🎒 Начальная школа, 2 класс</strong>
+                    Ты — разработчик учебных материалов. Создай HTML-файл с <b>обучающей игрой</b> на тему <b>«Таблица умножения»</b>. Данные: <b>примеры на умножение от 2 до 9</b>. Добавь <b>выбор примера, поле ввода ответа, подсчёт очков, яркий дизайн с крупными кнопками и анимацией</b>. Сделай адаптив для планшета. Весь код в одном файле.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- НЕЙРОСЕТИ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">3</div>
+                <div class="section-title">Топ нейросетей для учителя</div>
+            </div>
+
+            <div class="ai-grid">
+                <div class="ai-card">
+                    <div class="ai-icon">🤖</div>
+                    <div class="ai-info">
+                        <div class="ai-name">ChatGPT</div>
+                        <div class="ai-desc">Универсальный, пишет код и материалы</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag free">бесплатно</span>
+                            <span class="ai-tag hot">популярный</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🧠</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Claude</div>
+                        <div class="ai-desc">Точный, для длинных текстов и кода</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag free">бесплатно</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">✨</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Gemini</div>
+                        <div class="ai-desc">Интеграция с Google, работает с документами</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag free">бесплатно</span>
+                            <span class="ai-tag">Google</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🐋</span>
+                    <div class="ai-info">
+                        <div class="ai-name">DeepSeek</div>
+                        <div class="ai-desc">Мощный, отлично пишет код</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag free">бесплатно</span>
+                            <span class="ai-tag hot">для кода</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🌐</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Qwen</div>
+                        <div class="ai-desc">Мощная модель от Alibaba, отлично работает с кодом и текстами</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag free">бесплатно</span>
+                            <span class="ai-tag hot">новый</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🇷🇺</span>
+                    <div class="ai-info">
+                        <div class="ai-name">GigaChat (Сбер)</div>
+                        <div class="ai-desc">Российская, без VPN, понимает контекст РФ</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag ru">без VPN</span>
+                            <span class="ai-tag free">бесплатно</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🟡</span>
+                    <div class="ai-info">
+                        <div class="ai-name">YandexGPT</div>
+                        <div class="ai-desc">От Яндекса, хорошо работает с русским</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag ru">без VPN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">⚡</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Bolt.new / v0.dev</div>
+                        <div class="ai-desc">Генерируют готовые веб-приложения</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag hot">для интерактивов</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🎨</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Kandinsky / Шедеврум</div>
+                        <div class="ai-desc">Генерация картинок для презентаций</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag ru">без VPN</span>
+                            <span class="ai-tag">картинки</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">🎤</span>
+                    <div class="ai-info">
+                        <div class="ai-name">NotebookLM</div>
+                        <div class="ai-desc">Создаёт подкасты из ваших материалов</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag hot">аудио-уроки</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <span class="ai-icon">📊</span>
+                    <div class="ai-info">
+                        <div class="ai-name">Gamma.app</div>
+                        <div class="ai-desc">Создаёт презентации за 30 секунд</div>
+                        <div class="ai-tags">
+                            <span class="ai-tag">презентации</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЧТО МОЖНО СОЗДАТЬ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">4</div>
+                <div class="section-title">Что можно создать</div>
+            </div>
+
+            <div class="materials-grid">
+                <div class="material-card">
+                    <div class="material-icon">🎮</div>
+                    <div class="material-name">Тренажёры</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">📝</div>
+                    <div class="material-name">Тесты</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">📊</div>
+                    <div class="material-name">Диаграммы</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">🔬</div>
+                    <div class="material-name">Лаборатории</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">📅</div>
+                    <div class="material-name">Таймлайны</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">🗺️</div>
+                    <div class="material-name">Карты</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">💬</div>
+                    <div class="material-name">Диалоги</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">🎲</div>
+                    <div class="material-name">Игры</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">📖</div>
+                    <div class="material-name">Схемы</div>
+                </div>
+                <div class="material-card">
+                    <div class="material-icon">🎯</div>
+                    <div class="material-name">Карточки</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЧЕК-ЛИСТ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">5</div>
+                <div class="section-title">Чек-лист проверки материала</div>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Соответствует возрасту и уровню учеников</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Работает на устройстве в классе (телефон/планшет/ПК)</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Интерфейс на русском, понятные инструкции</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Есть обратная связь (проверка, подсказки)</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Можно использовать повторно</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Факты и термины проверены — ИИ мог ошибиться</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check">✓</div>
+                    <div class="check-text">Вы сами прошли материал до урока</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОШИБКИ -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">6</div>
+                <div class="section-title">Типичные ошибки</div>
+            </div>
+
+            <div class="mistakes-grid">
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Слишком общий запрос</div>
+                    <div class="mistake-desc">«Сделай тест по математике» — получите случайный набор.</div>
+                    <div class="mistake-fix">💡 Используйте шаблон промпта выше — заполните все поля</div>
+                </div>
+
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Слепая вера в ИИ</div>
+                    <div class="mistake-desc">ИИ может выдумать факты, даты, формулы.</div>
+                    <div class="mistake-fix">💡 Всегда проверяйте факты. ИИ — помощник, не источник истины</div>
+                </div>
+
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Ожидание идеала</div>
+                    <div class="mistake-desc">Первая версия почти никогда не идеальна.</div>
+                    <div class="mistake-fix">💡 Работайте итерациями: «добавь это», «измени вот здесь»</div>
+                </div>
+
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Игнорирование устройства</div>
+                    <div class="mistake-desc">Красиво на ПК, но не работает на телефоне.</div>
+                    <div class="mistake-fix">💡 Пишите в промпте «работает на телефоне» и тестируйте</div>
+                </div>
+
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Нет обратной связи</div>
+                    <div class="mistake-desc">Ученик делает задание, но не знает, правильно ли.</div>
+                    <div class="mistake-fix">💡 Просите ИИ добавить проверку и объяснения ошибок</div>
+                </div>
+
+                <div class="mistake-card">
+                    <div class="mistake-title">⚠️ Не проверили перед уроком</div>
+                    <div class="mistake-desc">Материал «сломался» или работает не так.</div>
+                    <div class="mistake-fix">💡 Пройдите материал сами за день до урока</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <div class="footer-quote">
+            ИИ не заменит учителя, но с ним учитель освобождает время для главного
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Конструктор диаграмм — интерактив</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(145deg, #eef2f7 0%, #dce5ec 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 1.8rem 2rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .header h1 {
+            font-weight: 800;
+            font-size: 2rem;
+            color: #1e2f3e;
+        }
+        .header h1 span {
+            background: #3b82f6;
+            color: #fff;
+            padding: 2px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .header .hint {
+            font-size: 1rem;
+            color: #4a6a8a;
+            background: #f1f5f9;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            padding: 12px 18px;
+            border-radius: 1.2rem;
+            border: 1px solid #e2e8f0;
+        }
+        .menu .menu-item {
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1e2f3e;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 2px solid transparent;
+            background: #ffffff;
+            touch-action: manipulation;
+        }
+        .menu .menu-item:hover {
+            background: #eaf0f6;
+            transform: scale(0.96);
+        }
+        .menu .menu-item.active {
+            border-color: #3b82f6;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .menu .menu-item .badge {
+            font-size: 0.6rem;
+            background: #22c55e;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 30px;
+            margin-left: 6px;
+        }
+
+        .title-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            padding: 10px 18px;
+            border-radius: 1.2rem;
+            border: 1px solid #e2e8f0;
+        }
+        .title-row .field-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .title-row .field-group label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1e3b4a;
+            white-space: nowrap;
+        }
+        .title-row .field-group input {
+            padding: 6px 14px;
+            border: 2px solid #dde3ed;
+            border-radius: 40px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.15s;
+            font-family: inherit;
+            width: auto;
+            min-width: 100px;
+            font-weight: 600;
+        }
+        .title-row .field-group input:focus {
+            border-color: #3b82f6;
+        }
+        .title-row .field-group input.chart-title-input {
+            min-width: 160px;
+            font-size: 1.1rem;
+        }
+
+        .group-settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            padding: 6px 0 10px;
+        }
+        .group-settings label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e3b4a;
+        }
+        .group-settings input {
+            width: 55px;
+            padding: 4px 10px;
+            border: 2px solid #dde3ed;
+            border-radius: 40px;
+            font-size: 1rem;
+            outline: none;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .group-settings input:focus {
+            border-color: #3b82f6;
+        }
+        .group-settings .btn-sm {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.15s;
+            touch-action: manipulation;
+        }
+        .group-settings .btn-sm:hover {
+            background: #cbdde6;
+            transform: scale(0.96);
+        }
+
+        .data-table {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 0;
+            align-items: center;
+            min-height: 56px;
+        }
+        .data-table .item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px 12px 6px 16px;
+            border-radius: 40px;
+            border: 1px solid #e2e8f0;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .data-table .item .label-input {
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e2f3e;
+            width: 50px;
+            outline: none;
+            font-family: inherit;
+        }
+        .data-table .item .label-input:focus {
+            border-bottom: 2px solid #3b82f6;
+        }
+        .data-table .item .value {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #1e40af;
+            min-width: 35px;
+            text-align: center;
+        }
+        .data-table .item .group-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: #fff;
+        }
+        .data-table .item .group-badge.g1 { background: #3b82f6; }
+        .data-table .item .group-badge.g2 { background: #f97316; }
+        .data-table .item .group-badge.g3 { background: #22c55e; }
+        .data-table .item .btn-sm {
+            background: #e2e8f0;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #1e2f3e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        .data-table .item .btn-sm:hover { transform: scale(0.9); }
+        .data-table .item .btn-sm.plus { background: #22c55e; color: #fff; font-size: 1.1rem; }
+        .data-table .item .btn-sm.plus:hover { background: #16a34a; }
+        .data-table .item .btn-sm.minus { background: #ef4444; color: #fff; font-size: 1.1rem; }
+        .data-table .item .btn-sm.minus:hover { background: #dc2626; }
+        .data-table .item .btn-sm.delete {
+            background: #fca5a5;
+            color: #7f1d1d;
+            width: 24px;
+            height: 24px;
+            font-size: 0.75rem;
+        }
+        .data-table .item .btn-sm.delete:hover { background: #f87171; }
+
+        .data-table .add-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .data-table .add-btn {
+            background: #dbeafe;
+            border: 2px dashed #3b82f6;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e40af;
+            cursor: pointer;
+            transition: 0.15s;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .data-table .add-btn:hover {
+            background: #bfdbfe;
+            transform: scale(0.96);
+        }
+        .data-table .add-group-select {
+            padding: 6px 14px;
+            border: 2px solid #dde3ed;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            outline: none;
+            font-family: inherit;
+            background: #fff;
+            font-weight: 600;
+        }
+        .data-table .add-group-select:focus {
+            border-color: #3b82f6;
+        }
+
+        .chart-area {
+            background: #ffffff;
+            border-radius: 1.2rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            min-height: 420px;
+            position: relative;
+        }
+        .chart-area canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            cursor: grab;
+        }
+        .chart-area canvas:active { cursor: grabbing; }
+        .chart-area canvas.no-drag { cursor: default; }
+
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .settings .btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e2f3e;
+            cursor: pointer;
+            transition: 0.15s;
+            touch-action: manipulation;
+        }
+        .settings .btn:hover {
+            background: #cbdde6;
+            transform: scale(0.96);
+        }
+        .settings .btn-primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+        .settings .btn-primary:hover {
+            background: #2563eb;
+        }
+        .settings .btn-warning {
+            background: #f59e0b;
+            color: #fff;
+        }
+        .settings .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8a9aaa;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 700px) {
+            .container { padding: 1.2rem; }
+            .title-row { flex-direction: column; align-items: stretch; }
+            .title-row .field-group { flex-wrap: wrap; }
+            .menu { justify-content: center; }
+            .menu .menu-item { font-size: 0.85rem; padding: 8px 16px; }
+            .data-table .item { padding: 4px 8px 4px 12px; }
+            .data-table .item .label-input { width: 35px; font-size: 0.8rem; }
+            .data-table .item .btn-sm { width: 22px; height: 22px; font-size: 0.75rem; }
+            .header h1 { font-size: 1.5rem; }
+            .header .hint { font-size: 0.8rem; padding: 4px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>📊 Конструктор диаграмм <span>интерактив</span></h1>
+        <div class="hint" id="interactHint">⬆⬇ Тяни столбцы мышкой</div>
+    </div>
+
+    <div class="menu" id="menu">
+        <div class="menu-item active" data-type="bar">📊 Столбчатая <span class="badge">интерактив</span></div>
+        <div class="menu-item" data-type="grouped">📊 С группировкой <span class="badge">интерактив</span></div>
+        <div class="menu-item" data-type="pie">🍩 Круговая</div>
+        <div class="menu-item" data-type="line">📈 Линейная <span class="badge">интерактив</span></div>
+    </div>
+
+    <div class="title-row">
+        <div class="field-group">
+            <label>📌</label>
+            <input type="text" id="chartTitle" value="Моя диаграмма" class="chart-title-input" placeholder="Название">
+        </div>
+        <div class="field-group">
+            <label>📋 X</label>
+            <input type="text" id="xLabel" value="Категории" placeholder="Ось X">
+        </div>
+        <div class="field-group">
+            <label>📋 Y</label>
+            <input type="text" id="yLabel" value="Значения" placeholder="Ось Y">
+        </div>
+        <div style="flex:1; text-align:right; font-size:0.8rem; color:#8a9aaa;">
+            <span id="dataInfo">5 категорий</span>
+        </div>
+    </div>
+
+    <div class="group-settings" id="groupSettings" style="display:none;">
+        <label>📊 Количество групп:</label>
+        <input type="number" id="groupCount" value="2" min="2" max="4">
+        <button class="btn-sm" id="applyGroupCount">Применить</button>
+        <span style="font-size:0.85rem; color:#6a8aaa; margin-left:4px; font-weight:500;">(каждая группа — свой цвет)</span>
+    </div>
+
+    <div class="data-table" id="dataTable">
+        <span style="color:#8a9aaa; font-size:1rem; font-weight:500;">Загрузите данные...</span>
+    </div>
+
+    <div class="chart-area">
+        <canvas id="chartCanvas" width="1000" height="560"></canvas>
+    </div>
+
+    <div class="settings">
+        <button class="btn" id="resetBtn">🔄 Сбросить данные</button>
+        <button class="btn btn-warning" id="randomBtn">🎲 Случайные</button>
+        <button class="btn btn-primary" id="exportBtn">📥 Скачать PNG</button>
+    </div>
+
+    <div class="footer-note">💡 Для столбчатой, группированной и линейной — тяни мышкой. Для круговой — кнопки +/−.</div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('chartCanvas');
+        const ctx = canvas.getContext('2d');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const chartTitle = document.getElementById('chartTitle');
+        const xLabel = document.getElementById('xLabel');
+        const yLabel = document.getElementById('yLabel');
+        const dataTable = document.getElementById('dataTable');
+        const resetBtn = document.getElementById('resetBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const interactHint = document.getElementById('interactHint');
+        const dataInfo = document.getElementById('dataInfo');
+        const groupSettings = document.getElementById('groupSettings');
+        const groupCountInput = document.getElementById('groupCount');
+        const applyGroupCountBtn = document.getElementById('applyGroupCount');
+
+        let currentType = 'bar';
+        let isDragging = false;
+        let dragIndex = -1;
+        let dragStartY = 0;
+        let dragStartValue = 0;
+        let currentMaxY = 100;
+
+        // ===== НОВОЕ: индекс линии, которую сейчас тянем =====
+        let currentDragLineIndex = -1;
+
+        const chartData = {
+            bar: {
+                data: [12, 25, 18, 30, 15],
+                labels: ['А', 'Б', 'В', 'Г', 'Д'],
+                groups: [],
+                title: 'Столбчатая диаграмма',
+                xLabel: 'Категории',
+                yLabel: 'Значения'
+            },
+            grouped: {
+                data: [12, 25, 18, 30, 15, 22, 8, 35, 20, 10],
+                labels: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
+                groups: [1, 1, 1, 1, 1, 2, 2, 2, 2, 2],
+                groupCount: 2,
+                title: 'Группированная диаграмма',
+                xLabel: 'Категории',
+                yLabel: 'Значения'
+            },
+            pie: {
+                data: [20, 30, 15, 25, 10],
+                labels: ['А', 'Б', 'В', 'Г', 'Д'],
+                groups: [],
+                title: 'Круговая диаграмма',
+                xLabel: 'Категории',
+                yLabel: 'Значения'
+            },
+            line: {
+                lines: [
+                    { data: [10, 20, 30, 25, 40, 35, 50], color: '#3b82f6', name: 'Линия 1' },
+                    { data: [15, 25, 20, 35, 30, 45, 40], color: '#f97316', name: 'Линия 2' }
+                ],
+                labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл'],
+                title: 'Линейная диаграмма',
+                xLabel: 'Месяцы',
+                yLabel: 'Значения'
+            }
+        };
+
+        let currentData = chartData.bar;
+
+        const groupColors = ['#3b82f6', '#f97316', '#22c55e', '#8b5cf6'];
+        const barColors = ['#3b82f6', '#f97316', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b', '#6366f1'];
+
+        function parseData(text) {
+            const items = text.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const result = [];
+            const lbls = [];
+            for (let item of items) {
+                const parts = item.split('=').map(s => s.trim());
+                if (parts.length === 2) {
+                    const val = parseFloat(parts[1]);
+                    if (!isNaN(val) && val >= 0) {
+                        lbls.push(parts[0]);
+                        result.push(Math.round(val * 10) / 10);
+                    }
+                }
+            }
+            if (result.length === 0) {
+                for (let item of items) {
+                    const val = parseFloat(item);
+                    if (!isNaN(val) && val >= 0) {
+                        lbls.push('Кат' + (lbls.length + 1));
+                        result.push(Math.round(val * 10) / 10);
+                    }
+                }
+            }
+            return { labels: lbls, data: result };
+        }
+
+        function formatDataString(dataArr, labelsArr) {
+            return dataArr.map((v, i) => {
+                const label = labelsArr[i] || 'Кат' + (i + 1);
+                return label + '=' + v;
+            }).join(', ');
+        }
+
+        function loadDataForType(type) {
+            const saved = chartData[type];
+            if (saved) {
+                currentData = saved;
+                chartTitle.value = saved.title || 'Диаграмма';
+                xLabel.value = saved.xLabel || 'Категории';
+                yLabel.value = saved.yLabel || 'Значения';
+
+                if (type === 'grouped') {
+                    groupCountInput.value = saved.groupCount || 2;
+                    groupSettings.style.display = 'flex';
+                } else {
+                    groupSettings.style.display = 'none';
+                }
+
+                if (type === 'line' && saved.lines) {
+                    interactHint.textContent = '📈 Линий: ' + saved.lines.length + '. Тяни точки любой линии независимо.';
+                } else {
+                    interactHint.textContent = '⬆⬇ Тяни столбцы мышкой';
+                }
+                updateDataInfo();
+                render(-1);
+            }
+        }
+
+        function saveCurrentData() {
+            if (currentType === 'line') {
+                currentData.title = chartTitle.value || 'Линейная диаграмма';
+                currentData.xLabel = xLabel.value || 'Категории';
+                currentData.yLabel = yLabel.value || 'Значения';
+                chartData.line = currentData;
+            } else {
+                currentData.title = chartTitle.value || 'Диаграмма';
+                currentData.xLabel = xLabel.value || 'Категории';
+                currentData.yLabel = yLabel.value || 'Значения';
+                chartData[currentType] = currentData;
+            }
+        }
+
+        function updateDataInfo() {
+            if (currentType === 'line') {
+                const lines = currentData.lines || [];
+                const labels = currentData.labels || [];
+                dataInfo.textContent = lines.length + ' линий, ' + labels.length + ' точек';
+            } else {
+                const data = currentData.data || [];
+                dataInfo.textContent = data.length + ' категорий';
+            }
+        }
+
+        function updateDataTable() {
+            dataTable.innerHTML = '';
+
+            if (currentType === 'line') {
+                renderLineTable();
+                return;
+            }
+
+            const data = currentData.data;
+            const labels = currentData.labels;
+            const groups = currentData.groups || [];
+
+            if (!data || data.length === 0) {
+                const emptyMsg = document.createElement('span');
+                emptyMsg.style.cssText = 'color:#8a9aaa; font-size:1rem; font-weight:500;';
+                emptyMsg.textContent = 'Нет данных. Нажмите «Случайные» или введите данные.';
+                dataTable.appendChild(emptyMsg);
+                renderAddControls();
+                return;
+            }
+
+            data.forEach((val, idx) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+
+                const labelInput = document.createElement('input');
+                labelInput.className = 'label-input';
+                labelInput.type = 'text';
+                labelInput.value = labels[idx] || 'Кат' + (idx + 1);
+                labelInput.maxLength = 10;
+                labelInput.addEventListener('change', function() {
+                    labels[idx] = this.value || 'Кат' + (idx + 1);
+                    render(-1);
+                });
+
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'value';
+                valueSpan.textContent = val;
+
+                if (currentType === 'grouped' && groups.length > idx) {
+                    const badge = document.createElement('span');
+                    badge.className = 'group-badge g' + (groups[idx] || 1);
+                    badge.textContent = 'Г' + (groups[idx] || 1);
+                    div.appendChild(badge);
+                }
+
+                const minusBtn = document.createElement('button');
+                minusBtn.className = 'btn-sm minus';
+                minusBtn.textContent = '−';
+                minusBtn.addEventListener('click', function() {
+                    const newVal = Math.round((data[idx] - 1) * 10) / 10;
+                    if (newVal >= 0) {
+                        data[idx] = newVal;
+                        render(-1);
+                    }
+                });
+
+                const plusBtn = document.createElement('button');
+                plusBtn.className = 'btn-sm plus';
+                plusBtn.textContent = '+';
+                plusBtn.addEventListener('click', function() {
+                    data[idx] = Math.round((data[idx] + 1) * 10) / 10;
+                    render(-1);
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-sm delete';
+                deleteBtn.textContent = '✕';
+                deleteBtn.addEventListener('click', function() {
+                    if (data.length > 1) {
+                        data.splice(idx, 1);
+                        labels.splice(idx, 1);
+                        if (groups.length > idx) groups.splice(idx, 1);
+                        render(-1);
+                    } else {
+                        alert('Нельзя удалить последнюю категорию!');
+                    }
+                });
+
+                div.appendChild(labelInput);
+                div.appendChild(valueSpan);
+                div.appendChild(minusBtn);
+                div.appendChild(plusBtn);
+                div.appendChild(deleteBtn);
+                dataTable.appendChild(div);
+            });
+
+            renderAddControls();
+            updateDataInfo();
+        }
+
+        // ===== ТАБЛИЦА ДЛЯ ЛИНЕЙНОЙ: КАЖДАЯ ЛИНИЯ — ОТДЕЛЬНАЯ СТРОКА =====
+        function renderLineTable() {
+            const lines = currentData.lines || [];
+            const labels = currentData.labels || [];
+
+            if (lines.length === 0 || labels.length === 0) {
+                const emptyMsg = document.createElement('span');
+                emptyMsg.style.cssText = 'color:#8a9aaa; font-size:1rem; font-weight:500;';
+                emptyMsg.textContent = 'Нет данных. Добавьте точки или линии.';
+                dataTable.appendChild(emptyMsg);
+                renderLineControls();
+                return;
+            }
+
+            // Для каждой линии — отдельная группа строк
+            lines.forEach((line, lineIdx) => {
+                const lineColor = line.color || groupColors[lineIdx % groupColors.length];
+                const lineName = line.name || 'Линия ' + (lineIdx + 1);
+
+                // Заголовок линии
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'item';
+                headerDiv.style.cssText = 'background:' + lineColor + '; color:#fff; width:100%; justify-content:space-between; padding:6px 14px;';
+                const nameInput = document.createElement('input');
+                nameInput.className = 'label-input';
+                nameInput.type = 'text';
+                nameInput.value = lineName;
+                nameInput.style.cssText = 'color:#fff; font-weight:800; font-size:0.95rem; min-width:120px;';
+                nameInput.addEventListener('change', function() {
+                    line.name = this.value || 'Линия ' + (lineIdx + 1);
+                    render(-1);
+                });
+                headerDiv.appendChild(nameInput);
+
+                const deleteLineBtn = document.createElement('button');
+                deleteLineBtn.className = 'btn-sm delete';
+                deleteLineBtn.textContent = '✕';
+                deleteLineBtn.title = 'Удалить линию';
+                deleteLineBtn.addEventListener('click', function() {
+                    if (lines.length > 1) {
+                        lines.splice(lineIdx, 1);
+                        render(-1);
+                    } else {
+                        alert('Нельзя удалить последнюю линию!');
+                    }
+                });
+                headerDiv.appendChild(deleteLineBtn);
+                dataTable.appendChild(headerDiv);
+
+                // Строки точек
+                for (let i = 0; i < labels.length; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'item';
+
+                    const labelInput = document.createElement('input');
+                    labelInput.className = 'label-input';
+                    labelInput.type = 'text';
+                    labelInput.value = labels[i] || 'Т' + (i + 1);
+                    labelInput.maxLength = 10;
+                    labelInput.style.width = '55px';
+                    labelInput.style.color = '#475569';
+                    labelInput.addEventListener('change', function() {
+                        currentData.labels[i] = this.value || 'Т' + (i + 1);
+                        render(-1);
+                    });
+                    div.appendChild(labelInput);
+
+                    const val = (i < line.data.length) ? line.data[i] : 0;
+                    const valSpan = document.createElement('span');
+                    valSpan.style.cssText = 'font-weight:800; font-size:0.95rem; color:' + lineColor + '; min-width:35px; text-align:center;';
+                    valSpan.textContent = val;
+                    div.appendChild(valSpan);
+
+                    const minusBtn = document.createElement('button');
+                    minusBtn.className = 'btn-sm minus';
+                    minusBtn.textContent = '−';
+                    minusBtn.addEventListener('click', function() {
+                        if (i < line.data.length) {
+                            const newVal = Math.round((line.data[i] - 1) * 10) / 10;
+                            if (newVal >= 0) {
+                                line.data[i] = newVal;
+                                render(-1);
+                            }
+                        }
+                    });
+
+                    const plusBtn = document.createElement('button');
+                    plusBtn.className = 'btn-sm plus';
+                    plusBtn.textContent = '+';
+                    plusBtn.addEventListener('click', function() {
+                        if (i < line.data.length) {
+                            line.data[i] = Math.round((line.data[i] + 1) * 10) / 10;
+                            render(-1);
+                        }
+                    });
+
+                    div.appendChild(minusBtn);
+                    div.appendChild(plusBtn);
+                    dataTable.appendChild(div);
+                }
+            });
+
+            renderLineControls();
+            updateDataInfo();
+        }
+
+        function renderLineControls() {
+            const controls = document.createElement('div');
+            controls.className = 'add-controls';
+
+            const addPointBtn = document.createElement('button');
+            addPointBtn.className = 'add-btn';
+            addPointBtn.innerHTML = '➕ Добавить точку';
+            addPointBtn.addEventListener('click', function() {
+                const newLabel = 'Т' + (currentData.labels.length + 1);
+                currentData.labels.push(newLabel);
+                currentData.lines.forEach(line => line.data.push(0));
+                render(-1);
+            });
+            controls.appendChild(addPointBtn);
+
+            const addLineBtn = document.createElement('button');
+            addLineBtn.className = 'add-btn';
+            addLineBtn.style.borderColor = '#f97316';
+            addLineBtn.style.color = '#f97316';
+            addLineBtn.innerHTML = '➕ Добавить линию';
+            addLineBtn.addEventListener('click', function() {
+                const newLineData = currentData.labels.map(() => 0);
+                const color = groupColors[currentData.lines.length % groupColors.length];
+                const newLine = {
+                    data: newLineData,
+                    color: color,
+                    name: 'Линия ' + (currentData.lines.length + 1)
+                };
+                currentData.lines.push(newLine);
+                render(-1);
+                interactHint.textContent = '📈 Линий: ' + currentData.lines.length + '. Тяни точки любой линии независимо.';
+            });
+            controls.appendChild(addLineBtn);
+
+            dataTable.appendChild(controls);
+        }
+
+        function renderAddControls() {
+            const controls = document.createElement('div');
+            controls.className = 'add-controls';
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-btn';
+            addBtn.innerHTML = '➕ Добавить';
+            addBtn.addEventListener('click', function() {
+                const newLabel = 'Нов' + (currentData.data.length + 1);
+                currentData.labels.push(newLabel);
+                currentData.data.push(0);
+
+                if (currentType === 'grouped') {
+                    const groupVal = parseInt(document.getElementById('addGroupSelect')?.value) || 1;
+                    currentData.groups.push(groupVal);
+                }
+                render(-1);
+            });
+            controls.appendChild(addBtn);
+
+            if (currentType === 'grouped') {
+                const select = document.createElement('select');
+                select.id = 'addGroupSelect';
+                select.className = 'add-group-select';
+                const gCount = currentData.groupCount || 2;
+                for (let i = 1; i <= gCount; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = 'Группа ' + i;
+                    select.appendChild(opt);
+                }
+                controls.appendChild(select);
+            }
+
+            dataTable.appendChild(controls);
+        }
+
+        applyGroupCountBtn.addEventListener('click', function() {
+            const newCount = parseInt(groupCountInput.value) || 2;
+            if (newCount < 2) { alert('Минимум 2 группы'); return; }
+            if (newCount > 4) { alert('Максимум 4 группы'); return; }
+            currentData.groupCount = newCount;
+            const groups = currentData.groups || [];
+            for (let i = 0; i < currentData.data.length; i++) {
+                if (!groups[i] || groups[i] > newCount) {
+                    groups[i] = (i % newCount) + 1;
+                }
+            }
+            currentData.groups = groups;
+            saveCurrentData();
+            render(-1);
+        });
+
+        function render(highlightIndex) {
+            if (currentType === 'line') {
+                drawLineChart(highlightIndex);
+                updateDataTable();
+                return;
+            }
+
+            const data = currentData.data;
+            const labels = currentData.labels;
+
+            if (!data || data.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#8a9aaa';
+                ctx.font = '20px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('📊 Нет данных для отображения', canvas.width / 2, canvas.height / 2);
+                ctx.font = '16px Segoe UI';
+                ctx.fillText('Нажмите «Случайные» для генерации', canvas.width / 2, canvas.height / 2 + 40);
+                updateDataTable();
+                return;
+            }
+
+            const title = currentData.title || chartTitle.value || 'Диаграмма';
+            const xLabelText = currentData.xLabel || xLabel.value || 'Категории';
+            const yLabelText = currentData.yLabel || yLabel.value || 'Значения';
+
+            chartTitle.value = title;
+            xLabel.value = xLabelText;
+            yLabel.value = yLabelText;
+
+            switch (currentType) {
+                case 'bar':
+                    drawBarChart(data, labels, title, xLabelText, yLabelText, highlightIndex);
+                    break;
+                case 'grouped':
+                    drawGroupedChart(data, labels, title, xLabelText, yLabelText, highlightIndex);
+                    break;
+                case 'pie':
+                    drawPieChart(data, labels, title);
+                    break;
+                default:
+                    drawBarChart(data, labels, title, xLabelText, yLabelText, highlightIndex);
+            }
+
+            updateDataTable();
+            saveCurrentData();
+        }
+
+        function drawBarChart(data, labels, title, xLabelText, yLabelText, highlightIndex) {
+            const W = canvas.width, H = canvas.height;
+            const margin = { top: 50, right: 40, bottom: 70, left: 70 };
+            const chartW = W - margin.left - margin.right;
+            const chartH = H - margin.top - margin.bottom;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.save();
+
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.fillStyle = '#1e2f3e';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, W / 2, 32);
+
+            const maxVal = Math.max(...data, 1);
+            const padding = maxVal * 0.1;
+            currentMaxY = maxVal + padding;
+
+            drawAxesAndGrid(margin, chartW, chartH, xLabelText, yLabelText, currentMaxY);
+
+            const barWidth = Math.min(chartW / data.length * 0.6, 60);
+            const gap = (chartW - barWidth * data.length) / (data.length + 1);
+            const barCoords = [];
+
+            ctx.textAlign = 'center';
+            for (let i = 0; i < data.length; i++) {
+                const x = margin.left + gap + i * (barWidth + gap);
+                const height = (data[i] / currentMaxY) * chartH;
+                const y = margin.top + chartH - height;
+
+                barCoords.push({ x, y, w: barWidth, h: height, index: i, value: data[i] });
+
+                const isHighlight = (i === highlightIndex);
+                const color = barColors[i % barColors.length];
+                ctx.fillStyle = isHighlight ? '#f59e0b' : color;
+                ctx.fillRect(x, y, barWidth, height);
+
+                ctx.fillStyle = '#1e2f3e';
+                ctx.font = 'bold 13px Segoe UI';
+                ctx.fillText(data[i], x + barWidth / 2, y - 8);
+
+                ctx.fillStyle = '#475569';
+                ctx.font = '12px Segoe UI';
+                const label = labels[i] || 'Кат' + (i + 1);
+                ctx.fillText(label, x + barWidth / 2, margin.top + chartH + 20);
+
+                const markerY = margin.top + chartH;
+                ctx.fillStyle = isHighlight ? '#f59e0b' : color;
+                ctx.beginPath();
+                ctx.moveTo(x + barWidth / 2 - 6, markerY - 2);
+                ctx.lineTo(x + barWidth / 2, markerY + 6);
+                ctx.lineTo(x + barWidth / 2 + 6, markerY - 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Segoe UI';
+                ctx.fillText('⬆⬇', x + barWidth / 2, markerY - 8);
+            }
+
+            ctx.strokeStyle = '#1e3a5f';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW, margin.top + chartH);
+            ctx.stroke();
+
+            ctx.restore();
+
+            window._barCoords = barCoords;
+            window._margin = margin;
+            window._chartH = chartH;
+            window._currentMaxY = currentMaxY;
+            window._chartW = chartW;
+        }
+
+        function drawGroupedChart(data, labels, title, xLabelText, yLabelText, highlightIndex) {
+            const W = canvas.width, H = canvas.height;
+            const margin = { top: 50, right: 40, bottom: 70, left: 70 };
+            const chartW = W - margin.left - margin.right;
+            const chartH = H - margin.top - margin.bottom;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.save();
+
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.fillStyle = '#1e2f3e';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, W / 2, 32);
+
+            const maxVal = Math.max(...data, 1);
+            const padding = maxVal * 0.1;
+            currentMaxY = maxVal + padding;
+
+            drawAxesAndGrid(margin, chartW, chartH, xLabelText, yLabelText, currentMaxY);
+
+            const groups = currentData.groups || [];
+            const groupCount = currentData.groupCount || 2;
+
+            const grouped = {};
+            for (let i = 0; i < groupCount; i++) {
+                grouped[i + 1] = { data: [], labels: [], indices: [] };
+            }
+            for (let i = 0; i < data.length; i++) {
+                const g = groups[i] || ((i % groupCount) + 1);
+                grouped[g].data.push(data[i]);
+                grouped[g].labels.push(labels[i] || 'Кат' + (i + 1));
+                grouped[g].indices.push(i);
+            }
+
+            let maxItems = 0;
+            for (let g in grouped) {
+                if (grouped[g].data.length > maxItems) maxItems = grouped[g].data.length;
+            }
+
+            const groupWidth = chartW / maxItems;
+            const barWidth = Math.min(groupWidth * 0.25, 30);
+            const gap = groupWidth * 0.04;
+            const barCoords = [];
+
+            ctx.textAlign = 'center';
+
+            const groupKeys = Object.keys(grouped).sort();
+            for (let i = 0; i < maxItems; i++) {
+                const xBase = margin.left + i * groupWidth + groupWidth / 2;
+
+                for (let gIdx = 0; gIdx < groupKeys.length; gIdx++) {
+                    const g = groupKeys[gIdx];
+                    const gData = grouped[g];
+                    if (i >= gData.data.length) continue;
+
+                    const val = gData.data[i];
+                    const height = (val / currentMaxY) * chartH;
+                    const y = margin.top + chartH - height;
+
+                    const totalWidth = groupKeys.length * (barWidth + gap) - gap;
+                    const startX = xBase - totalWidth / 2;
+                    const x = startX + gIdx * (barWidth + gap);
+
+                    const globalIdx = gData.indices[i];
+                    const isHighlight = (globalIdx === highlightIndex);
+                    const color = groupColors[(parseInt(g) - 1) % groupColors.length];
+
+                    barCoords.push({
+                        x, y, w: barWidth, h: height,
+                        index: globalIdx, value: val, group: parseInt(g)
+                    });
+
+                    ctx.fillStyle = isHighlight ? '#f59e0b' : color;
+                    ctx.fillRect(x, y, barWidth, height);
+
+                    ctx.fillStyle = '#1e2f3e';
+                    ctx.font = 'bold 11px Segoe UI';
+                    ctx.fillText(val, x + barWidth / 2, y - 4);
+
+                    if (i === 0) {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x + barWidth / 2 - 3, margin.top + chartH + 2, 6, 6);
+                        ctx.fillStyle = '#475569';
+                        ctx.font = '10px Segoe UI';
+                        ctx.textAlign = 'left';
+                        ctx.fillText('Группа ' + g, x + barWidth / 2 + 8, margin.top + chartH + 10);
+                        ctx.textAlign = 'center';
+                    }
+                }
+
+                const firstKey = groupKeys[0];
+                const firstLabel = grouped[firstKey]?.labels[i] || '';
+                ctx.fillStyle = '#475569';
+                ctx.font = '11px Segoe UI';
+                ctx.fillText(firstLabel, xBase, margin.top + chartH + 30);
+            }
+
+            ctx.strokeStyle = '#1e3a5f';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW, margin.top + chartH);
+            ctx.stroke();
+
+            ctx.restore();
+
+            window._barCoords = barCoords;
+            window._margin = margin;
+            window._chartH = chartH;
+            window._currentMaxY = currentMaxY;
+            window._chartW = chartW;
+        }
+
+        // ===== ОТРИСОВКА ЛИНЕЙНОЙ (с поддержкой подсветки конкретной точки) =====
+        function drawLineChart(highlightIndex) {
+            const W = canvas.width, H = canvas.height;
+            const margin = { top: 50, right: 40, bottom: 70, left: 70 };
+            const chartW = W - margin.left - margin.right;
+            const chartH = H - margin.top - margin.bottom;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.save();
+
+            const title = currentData.title || chartTitle.value || 'Линейная диаграмма';
+            const xLabelText = currentData.xLabel || xLabel.value || 'Категории';
+            const yLabelText = currentData.yLabel || yLabel.value || 'Значения';
+
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.fillStyle = '#1e2f3e';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, W / 2, 32);
+
+            const lines = currentData.lines || [];
+            const labels = currentData.labels || [];
+
+            if (lines.length === 0 || labels.length === 0) {
+                ctx.fillStyle = '#8a9aaa';
+                ctx.font = '18px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нет данных для отображения', W / 2, H / 2);
+                ctx.restore();
+                return;
+            }
+
+            let maxVal = 1;
+            lines.forEach(line => {
+                line.data.forEach(v => { if (v > maxVal) maxVal = v; });
+            });
+            const maxY = maxVal * 1.15;
+
+            drawAxesAndGrid(margin, chartW, chartH, xLabelText, yLabelText, maxY);
+
+            if (labels.length < 2) {
+                ctx.fillStyle = '#8a9aaa';
+                ctx.font = '16px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нужно минимум 2 точки', W / 2, H / 2);
+                ctx.restore();
+                return;
+            }
+
+            const allPoints = [];
+            lines.forEach((line, lineIdx) => {
+                const lineData = line.data;
+                const color = line.color || groupColors[lineIdx % groupColors.length];
+                const stepX = chartW / (Math.max(lineData.length, 2) - 1);
+                const points = [];
+
+                for (let i = 0; i < lineData.length; i++) {
+                    const x = margin.left + i * stepX;
+                    const y = margin.top + chartH - (lineData[i] / maxY) * chartH;
+                    points.push({ x, y, index: i, value: lineData[i] });
+                }
+
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash(lineIdx === 0 ? [] : [6, 4]);
+                if (points.length > 0) {
+                    ctx.moveTo(points[0].x, points[0].y);
+                    for (let i = 1; i < points.length; i++) {
+                        ctx.lineTo(points[i].x, points[i].y);
+                    }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                points.forEach((p, i) => {
+                    // Подсветка активной точки (только у текущей тянутой линии)
+                    const isActiveLine = (lineIdx === currentDragLineIndex);
+                    const isActivePoint = (i === dragIndex);
+                    const isHighlight = isActiveLine && isActivePoint;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, isHighlight ? 9 : 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = isHighlight ? '#f59e0b' : '#ffffff';
+                    ctx.fill();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Показываем значение: всегда для активной линии, либо для всех если не тянем
+                    if (isActiveLine || (!isDragging)) {
+                        ctx.fillStyle = color;
+                        ctx.font = 'bold 11px Segoe UI';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(p.value, p.x, p.y - 14);
+                    }
+                });
+
+                allPoints.push({ points, color, name: line.name });
+
+                const legendY = margin.top + 8 + lineIdx * 24;
+                ctx.fillStyle = color;
+                ctx.fillRect(margin.left + chartW - 160, legendY, 16, 16);
+                ctx.fillStyle = '#1e2f3e';
+                ctx.font = '12px Segoe UI';
+                ctx.textAlign = 'left';
+                ctx.fillText(line.name || 'Линия ' + (lineIdx + 1), margin.left + chartW - 138, legendY + 14);
+            });
+
+            ctx.textAlign = 'center';
+            const stepX = chartW / (labels.length - 1);
+            for (let i = 0; i < labels.length; i++) {
+                const x = margin.left + i * stepX;
+                ctx.fillStyle = '#475569';
+                ctx.font = '11px Segoe UI';
+                ctx.fillText(labels[i] || 'Т' + (i + 1), x, margin.top + chartH + 20);
+            }
+
+            ctx.strokeStyle = '#1e3a5f';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW, margin.top + chartH);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Сохраняем точки ВСЕХ линий для поиска
+            window._linePoints = allPoints;
+            window._margin = margin;
+            window._chartH = chartH;
+            window._chartW = chartW;
+            window._maxY = maxY;
+        }
+
+        function drawAxesAndGrid(margin, chartW, chartH, xLabelText, yLabelText, maxVal) {
+            const W = canvas.width, H = canvas.height;
+
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW, margin.top + chartH);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(margin.left - 5, margin.top - 2);
+            ctx.lineTo(margin.left, margin.top - 8);
+            ctx.lineTo(margin.left + 5, margin.top - 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(margin.left + chartW - 2, margin.top + chartH - 5);
+            ctx.lineTo(margin.left + chartW + 6, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW - 2, margin.top + chartH + 5);
+            ctx.fill();
+
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.fillStyle = '#1e2f3e';
+            ctx.textAlign = 'center';
+            ctx.fillText(yLabelText, 24, margin.top + chartH / 2);
+            ctx.fillText(xLabelText, margin.left + chartW / 2, canvas.height - 10);
+
+            const steps = 5;
+            ctx.font = '12px Segoe UI';
+            ctx.fillStyle = '#475569';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= steps; i++) {
+                const val = (maxVal / steps) * i;
+                const y = margin.top + chartH - (val / maxVal) * chartH;
+                ctx.fillText(Math.round(val), margin.left - 10, y + 4);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(margin.left + chartW, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawPieChart(data, labels, title) {
+            const W = canvas.width, H = canvas.height;
+            const centerX = W / 2;
+            const centerY = H / 2 + 10;
+            const radius = Math.min(W, H) * 0.35;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.save();
+
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.fillStyle = '#1e2f3e';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, W / 2, 32);
+
+            const total = data.reduce((a, b) => a + b, 0);
+            if (total === 0) {
+                ctx.fillStyle = '#8a9aaa';
+                ctx.font = '18px Segoe UI';
+                ctx.fillText('Нет данных', W / 2, H / 2);
+                ctx.restore();
+                return;
+            }
+
+            let startAngle = -Math.PI / 2;
+
+            for (let i = 0; i < data.length; i++) {
+                const sliceAngle = (data[i] / total) * 2 * Math.PI;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = groupColors[i % groupColors.length];
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const midAngle = startAngle + sliceAngle / 2;
+                const labelRadius = radius * 0.65;
+                const lx = centerX + Math.cos(midAngle) * labelRadius;
+                const ly = centerY + Math.sin(midAngle) * labelRadius;
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const percent = Math.round((data[i] / total) * 100);
+                if (percent > 5) {
+                    ctx.fillText(percent + '%', lx, ly);
+                }
+
+                startAngle = endAngle;
+            }
+
+            const legendX = 20;
+            let legendY = 70;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i < Math.min(data.length, 8); i++) {
+                ctx.fillStyle = groupColors[i % groupColors.length];
+                ctx.fillRect(legendX, legendY, 16, 16);
+                ctx.fillStyle = '#1e2f3e';
+                ctx.font = '12px Segoe UI';
+                const label = labels[i] || 'Кат' + (i + 1);
+                ctx.fillText(label + ' (' + data[i] + ')', legendX + 22, legendY + 8);
+                legendY += 26;
+            }
+
+            ctx.restore();
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
+            const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function findBarIndex(mx, my) {
+            if (!window._barCoords) return -1;
+            const coords = window._barCoords;
+            for (let i = 0; i < coords.length; i++) {
+                const b = coords[i];
+                if (mx >= b.x && mx <= b.x + b.w) {
+                    if (my >= b.y - 15 && my <= b.y + b.h + 15) {
+                        return b.index;
+                    }
+                }
+                const markerY = window._margin ? window._margin.top + window._chartH : 0;
+                if (mx >= b.x && mx <= b.x + b.w && my >= markerY - 15 && my <= markerY + 15) {
+                    return b.index;
+                }
+            }
+            return -1;
+        }
+
+        // ===== ИСПРАВЛЕНО: возвращает объект { lineIndex, pointIndex } =====
+        function findLinePointIndex(mx, my) {
+            if (!window._linePoints || window._linePoints.length === 0) return null;
+
+            for (let lIdx = 0; lIdx < window._linePoints.length; lIdx++) {
+                const points = window._linePoints[lIdx].points;
+                for (let pIdx = 0; pIdx < points.length; pIdx++) {
+                    const p = points[pIdx];
+                    const dx = mx - p.x;
+                    const dy = my - p.y;
+                    if (dx * dx + dy * dy < 400) {
+                        return { lineIndex: lIdx, pointIndex: pIdx };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function onMouseDown(e) {
+            if (currentType === 'bar' || currentType === 'grouped') {
+                e.preventDefault();
+                const pos = getMousePos(e);
+                const idx = findBarIndex(pos.x, pos.y);
+                if (idx >= 0 && idx < currentData.data.length) {
+                    isDragging = true;
+                    dragIndex = idx;
+                    dragStartY = pos.y;
+                    dragStartValue = currentData.data[idx];
+                    canvas.style.cursor = 'grabbing';
+                    render(idx);
+                }
+            } else if (currentType === 'line') {
+                e.preventDefault();
+                const pos = getMousePos(e);
+                const target = findLinePointIndex(pos.x, pos.y);
+
+                if (target) {
+                    isDragging = true;
+                    currentDragLineIndex = target.lineIndex;
+                    dragIndex = target.pointIndex;
+                    dragStartY = pos.y;
+                    dragStartValue = currentData.lines[target.lineIndex].data[target.pointIndex];
+                    canvas.style.cursor = 'grabbing';
+                    render(-1);
+                }
+            }
+        }
+
+        function onMouseMove(e) {
+            if (currentType === 'bar' || currentType === 'grouped') {
+                if (!isDragging || dragIndex < 0 || dragIndex >= currentData.data.length) {
+                    const pos = getMousePos(e);
+                    const idx = findBarIndex(pos.x, pos.y);
+                    canvas.style.cursor = idx >= 0 ? 'grab' : 'default';
+                    return;
+                }
+                e.preventDefault();
+                const pos = getMousePos(e);
+                const deltaY = dragStartY - pos.y;
+                const chartH = window._chartH || 400;
+                const maxY = window._currentMaxY || 100;
+                const deltaVal = (deltaY / chartH) * maxY;
+                let newVal = Math.round((dragStartValue + deltaVal) * 10) / 10;
+                if (newVal < 0) newVal = 0;
+                if (newVal > maxY * 1.5) newVal = maxY * 1.5;
+
+                currentData.data[dragIndex] = newVal;
+                render(dragIndex);
+            } else if (currentType === 'line') {
+                if (!isDragging) {
+                    const pos = getMousePos(e);
+                    const target = findLinePointIndex(pos.x, pos.y);
+                    canvas.style.cursor = target ? 'grab' : 'default';
+                    return;
+                }
+
+                if (isDragging && currentDragLineIndex >= 0 && currentData.lines[currentDragLineIndex]) {
+                    e.preventDefault();
+                    const pos = getMousePos(e);
+                    const deltaY = dragStartY - pos.y;
+                    const chartH = window._chartH || 400;
+                    const maxY = window._maxY || 100;
+                    const deltaVal = (deltaY / chartH) * maxY;
+
+                    let newVal = Math.round((dragStartValue + deltaVal) * 10) / 10;
+                    if (newVal < 0) newVal = 0;
+                    if (newVal > maxY * 1.5) newVal = maxY * 1.5;
+
+                    // ===== ИЗМЕНЯЕМ ЗНАЧЕНИЕ ТОЛЬКО У ОДНОЙ КОНКРЕТНОЙ ЛИНИИ =====
+                    currentData.lines[currentDragLineIndex].data[dragIndex] = newVal;
+
+                    render(-1);
+                }
+            }
+        }
+
+        function onMouseUp(e) {
+            if (isDragging) {
+                isDragging = false;
+                dragIndex = -1;
+                currentDragLineIndex = -1;
+                canvas.style.cursor = 'grab';
+                saveCurrentData();
+                render(-1);
+            }
+        }
+
+        canvas.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+
+        canvas.addEventListener('touchstart', function(e) {
+            if (currentType !== 'bar' && currentType !== 'grouped' && currentType !== 'line') return;
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY });
+            onMouseDown(mouseEvent);
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY });
+            onMouseMove(mouseEvent);
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', function(e) {
+            onMouseUp(e);
+        }, { passive: true });
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                saveCurrentData();
+                menuItems.forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                currentType = this.dataset.type;
+                loadDataForType(currentType);
+
+                if (currentType === 'bar' || currentType === 'grouped') {
+                    canvas.style.cursor = 'grab';
+                    interactHint.textContent = '⬆⬇ Тяни столбцы мышкой';
+                } else if (currentType === 'line') {
+                    canvas.style.cursor = 'grab';
+                    interactHint.textContent = '📈 Тяни точки любой линии независимо';
+                } else {
+                    canvas.style.cursor = 'default';
+                    interactHint.textContent = '✋ Используй кнопки +/−';
+                }
+                render(-1);
+            });
+        });
+
+        chartTitle.addEventListener('change', function() { saveCurrentData(); render(-1); });
+        xLabel.addEventListener('change', function() { saveCurrentData(); render(-1); });
+        yLabel.addEventListener('change', function() { saveCurrentData(); render(-1); });
+
+        resetBtn.addEventListener('click', function() {
+            loadDataForType(currentType);
+            render(-1);
+        });
+
+        randomBtn.addEventListener('click', function() {
+            if (currentType === 'line') {
+                const lbls = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл'];
+                const count = Math.floor(Math.random() * 4) + 3;
+                const labels = lbls.slice(0, count);
+                const line1Data = [];
+                const line2Data = [];
+                for (let i = 0; i < count; i++) {
+                    line1Data.push(Math.round((Math.random() * 40 + 5) * 10) / 10);
+                    line2Data.push(Math.round((Math.random() * 30 + 10) * 10) / 10);
+                }
+                currentData.labels = labels;
+                currentData.lines = [
+                    { data: line1Data, color: '#3b82f6', name: 'Линия 1' },
+                    { data: line2Data, color: '#f97316', name: 'Линия 2' }
+                ];
+                currentData.title = 'Случайные данные';
+                chartTitle.value = currentData.title;
+                saveCurrentData();
+                render(-1);
+            } else {
+                const lbls = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З'];
+                const count = Math.floor(Math.random() * 4) + 3;
+                const dataArr = [];
+                for (let i = 0; i < count; i++) {
+                    dataArr.push(Math.round((Math.random() * 40 + 5) * 10) / 10);
+                }
+                currentData.data = dataArr;
+                currentData.labels = lbls.slice(0, count);
+                currentData.title = 'Случайные данные';
+                chartTitle.value = currentData.title;
+                saveCurrentData();
+                render(-1);
+            }
+        });
+
+        exportBtn.addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.download = 'diagramma.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        loadDataForType('bar');
+        render(-1);
+    })();
+</script>
+</body>
+</html>
